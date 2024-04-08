@@ -6,12 +6,12 @@ First, run the development server:
 
 ```bash
 npm run dev
-
+```
 
 ## Avaliable features
 
-Posting a review
-Viewing a review
-Signing up/ in with email and password
-Fetching realtime data
-Pesisted login etc
+- Posting a review
+- Viewing a review
+- Signing up/ in with email and password
+- Fetching realtime data
+- Pesisted login etc
