@@ -11,6 +11,7 @@ import { UserContext } from "@/context/user.context";
 import { getName } from "@/utils/helper";
 import { signInAuthUserWithEmailAndPassword } from "@/utils/firebase/firebase.utils";
 import { useRouter } from "next/navigation";
+import Link  from "next/link";
 
 const defaultValue = {
   email_address: "",
@@ -43,7 +44,7 @@ const Login = () => {
     try {
       await signInAuthUserWithEmailAndPassword(email_address, password);
 
-      console.log("user sign in successful")
+      console.log("user sign in successful");
       resetFormFields();
     } catch (error) {
       console.log("user sign in failed", error);
@@ -100,7 +101,7 @@ const Login = () => {
             </div>
 
             <div className="flex flex-col gap-3">
-              <LoginWithExternal img={google.src} text="Login with Google" />
+              <LoginWithExternal img={google.src} text="Login with Google"  />
               <LoginWithExternal
                 img={facebook.src}
                 text="Login with Facebook"
@@ -116,12 +117,12 @@ const Login = () => {
               <span className="text-stone-900 text-xs font-normal ">
                 Have an account?{" "}
               </span>
-              <span
+              <Link
                 className="text-blue-600 text-xs font-semibold  underline cursor-pointer"
-                onClick={() => router.route("/login")}
+                href="/register"
               >
-                Login
-              </span>
+                Register
+              </Link>
             </div>
           </div>
         </div>

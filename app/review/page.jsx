@@ -13,6 +13,13 @@ import { UserContext } from "@/context/user.context";
 import { collection, onSnapshot, query } from "firebase/firestore";
 import { db } from "@/utils/firebase/firebase.utils";
 
+import img1 from "@/assets/review/img1.png";
+import img2 from "@/assets/review/img2.png";
+import img3 from "@/assets/review/img3.png";
+import img4 from "@/assets/review/img4.png";
+
+import logo from "@/assets/profilepic.png";
+
 const Review = () => {
   const { currentUser, setCurrentUser, userDetails } = useContext(UserContext);
 
@@ -109,7 +116,7 @@ function ReviewMenu({ setReview, review }) {
 
           <div className="justify-start items-start gap-1 flex max-md:justify-center w-full">
             <p className="text-center text-zinc-900 text-base font-semibold  leading-normal max-sm:my-4 max-md:text-center">
-              “{review.length || 0}” Reviews
+              “{review.length || 0}” {review.length > 1 ? "Reviews" : "Review"}
             </p>
           </div>
         </div>
@@ -194,15 +201,12 @@ function ReviewMessage({ reviewData }) {
               <p className="text-stone-900 text-sm font-normal">Anonymus</p>
 
               <div className="text-stone-900 text-opacity-60 text-sm font-normal ">
-                5 months ago
+                {createdAt?.toDate().toLocaleDateString()}
               </div>
             </div>
           ) : (
             <div className="flex gap-2 items-center">
-              <img
-                className="w-6 h-6 rounded-full"
-                src="https://via.placeholder.com/24x24"
-              />
+              <img className="w-6 h-6 rounded-full" src={logo.src} />
 
               <p className="text-stone-900 text-sm font-normal">
                 {username?.slice(0, 1)?.toUpperCase() + username?.slice(1)}
@@ -253,24 +257,24 @@ function ReviewImages() {
   return (
     <div className="grid  max-md:hidden md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4 h-fit">
       <img
-        src="https://via.placeholder.com/235x224"
+        src={img1.src}
         alt="Image 1"
-        className="w-full h-full object-cover"
+        className="w-full h-full  object-cover rounded-2xl cursor-pointer"
       />
       <img
-        src="https://via.placeholder.com/235x224"
+        src={img2.src}
         alt="Image 1"
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover rounded-2xl cursor-pointer"
       />
       <img
-        src="https://via.placeholder.com/235x224"
+        src={img3.src}
         alt="Image 1"
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover rounded-2xl cursor-pointer"
       />
       <img
-        src="https://via.placeholder.com/235x224"
+        src={img4.src}
         alt="Image 1"
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover rounded-2xl cursor-pointer"
       />
     </div>
   );

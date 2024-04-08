@@ -13,7 +13,8 @@ import {
   createAuthUserWithEmailAndPassword,
   createUserDocumentFromAuth,
 } from "@/utils/firebase/firebase.utils";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const defaultValue = {
   username: "",
@@ -142,12 +143,12 @@ const Register = () => {
               <span className="text-stone-900 text-xs font-normal ">
                 Have an account?{" "}
               </span>
-              <span
+              <Link
                 className="text-blue-600 text-xs font-semibold  underline cursor-pointer"
-                onClick={() => router.route("/login")}
+                href="/login"
               >
                 Login
-              </span>
+              </Link>
             </div>
           </div>
         </div>

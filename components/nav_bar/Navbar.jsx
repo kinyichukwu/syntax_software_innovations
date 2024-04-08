@@ -6,6 +6,8 @@ import { MdCancel } from "react-icons/md";
 import Link from "next/link";
 import { UserContext } from "@/context/user.context";
 
+import profilepic from "@/assets/profilepic.png";
+
 const Navbar = ({}) => {
   const { currentUser, userData } = useContext(UserContext);
 
@@ -32,14 +34,13 @@ const Navbar = ({}) => {
         {currentUser ? (
           <div className="flex gap-3 items-center justify-end w-full">
             <p className="text-right text-neutral-900 text-base font-medium leading-[10px] block ">
-              Welcome! {userData?.username}
+              Welcome!
+              {" " +
+                userData?.username?.slice(0, 1)?.toUpperCase() +
+                userData?.username?.slice(1)}
             </p>
 
-            <img
-              src={"https://via.placeholder.com/36x36"}
-              alt="User"
-              className="h-8 rounded-full"
-            />
+            <img src={profilepic.src} alt="User" className="h-8 rounded-full" />
           </div>
         ) : (
           <Link className=" mr-4 text-p" href="/login">
