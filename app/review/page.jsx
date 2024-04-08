@@ -1,19 +1,33 @@
+"use client"
 import Navbar from "@/components/nav_bar/Navbar";
 import NoReview from "@/components/review/NoReview";
 import star from "@/assets/review/star.svg";
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import { FaRegThumbsDown, FaRegThumbsUp, FaThumbsUp } from "react-icons/fa";
 import { FaRegMessage } from "react-icons/fa6";
 import { CiShare2 } from "react-icons/ci";
 import { IoBookmarkOutline } from "react-icons/io5";
 import ReviewCreator from "@/components/review/ReviewCreator";
+import { useRouter } from "next/navigation";
+import { UserContext } from "@/context/user.context";
 
 const Review = () => {
+  const { currentUser, userDetails } = useContext(UserContext);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!currentUser) {
+      router.push("/register");
+    }
+  }, [currentUser]);
+
+
   return (
     <div className="overflow-x-hidden">
       <div className="w-full bg-blue-50 justify-center items-center flex ">
         <div className=" pb-4 flex-col justify-start items-center ">
-          <Navbar auth={true} />
+          <Navbar />
           <ReviewMenu />
         </div>
       </div>

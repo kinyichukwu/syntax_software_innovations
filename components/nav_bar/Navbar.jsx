@@ -1,9 +1,14 @@
-import React from "react";
+"use client";
+import React, { useContext } from "react";
 import Logo from "../../assets/ic_logo.png";
 import { FaSearch } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
+import Link from "next/link";
+import { UserContext } from "@/context/user.context";
 
-const Navbar = ({ auth }) => {
+const Navbar = ({}) => {
+  const { currentUser, userData } = useContext(UserContext);
+
   return (
     <>
       <nav className="flex items-center justify-between  px-4 py-3 max-w-7xl mx-auto">
@@ -11,7 +16,7 @@ const Navbar = ({ auth }) => {
           {/* Logo */}
           <img src={Logo.src} alt="Logo" className="h-8" />
 
-          {auth && (
+          {currentUser && (
             <div className="flex gap-3 py-2 px-3 bg-white rounded-md max-w-[45rem] w-full justify-center items-center mx-5 max-md:hidden">
               <FaSearch className="w-6 h-6 text-p" />
 
@@ -24,10 +29,10 @@ const Navbar = ({ auth }) => {
           )}
         </div>
 
-        {auth ? (
-          <div className="flex gap-3 items-center justify-center">
-            <p className="text-right text-neutral-900 text-base font-medium leading-[10px]">
-              Welcome!
+        {currentUser ? (
+          <div className="flex gap-3 items-center justify-end w-full">
+            <p className="text-right text-neutral-900 text-base font-medium leading-[10px] block ">
+              Welcome! {userData?.username}
             </p>
 
             <img
@@ -37,13 +42,13 @@ const Navbar = ({ auth }) => {
             />
           </div>
         ) : (
-          <a href="/login" className=" mr-4 text-p">
+          <Link className=" mr-4 text-p" href="/login">
             LOGIN
-          </a>
+          </Link>
         )}
       </nav>
 
-      {auth && (
+      {currentUser && (
         <div className="flex gap-3 py-2 px-3 bg-white rounded-md max-w-[45rem] w-full justify-center items-center md:hidden">
           <FaSearch className="w-6 h-6 text-p" />
 

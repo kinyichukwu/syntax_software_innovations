@@ -1,3 +1,4 @@
+"use client";
 import Navbar from "@/components/nav_bar/Navbar";
 import heroDextop from "../assets/home/dextop_hero.png";
 import heroMobile from "../assets/home/mobile_hero.png";
@@ -5,8 +6,10 @@ import heroMobile from "../assets/home/mobile_hero.png";
 import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 import { AiOutlineSearch } from "react-icons/ai";
 import { FaBars } from "react-icons/fa";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
   return (
     <>
       <Navbar />
@@ -17,6 +20,7 @@ export default function Home() {
               Find a place you <br />
               will love to live!
             </h1>
+
             <p className="mt-6 mb-8 sm:text-lg sm:mb-12 text-sm">
               See through the lenses of people who have <br />
               lived or visited the neighbourhood you might <br />
@@ -34,8 +38,15 @@ export default function Home() {
               </div>
             </div>
 
-            <button className="rounded-md bg-[#3366FF] px-5 py-3 text-sm text-white shadow-sm hover:bg-[#3366ffd8] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3861dc] w-fit">
-              SEARCH
+            <button
+              className="rounded-md bg-[#3366FF] px-5 py-3 text-sm text-white shadow-sm hover:bg-[#3366ffd8] 
+            focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3861dc] 
+            w-fit"
+              onClick={() => {
+                router.push("/review");
+              }}
+            >
+              REVIEW
             </button>
           </div>
           <div className="flex items-center justify-center p-6 mt-8 lg:mt-0 h-72 sm:h-full w-full">

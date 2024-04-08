@@ -1,44 +1,119 @@
-import React from "react";
-import facebook from "../../assets/auth/Facebook.svg";
-import google from "../../assets/auth/Google.svg";
-import apple from "../../assets/auth/Apple.svg";
+"use client";
+import React, { useContext, useEffect, useState } from "react";
+import facebook from "@/assets/auth/Facebook.svg";
+import google from "@/assets/auth/Google.svg";
+import apple from "@/assets/auth/Apple.svg";
 import Navbar from "@/components/nav_bar/Navbar";
 import Input from "@/components/auth/Input";
 import AuthHead from "@/components/auth/AuthHead";
 import { LoginWithExternal } from "@/components/buttons/LoginWithExternal";
+import { UserContext } from "@/context/user.context";
+import { getName } from "@/utils/helper";
+import {
+  createAuthUserWithEmailAndPassword,
+  createUserDocumentFromAuth,
+} from "@/utils/firebase/firebase.utils";
+import { useRouter } from "next/router";
+
+const defaultValue = {
+  username: "",
+  email_address: "",
+  password: "",
+  confirm_password: "",
+};
 
 const Register = () => {
+  const [state, setstate] = useState("unloaded");
+  const [formField, setFormField] = useState(defaultValue);
+
+  const { currentUser, userDetails } = useContext(UserContext);
+
+  console.log(currentUser, userDetails);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (currentUser) {
+      router.push("/review");
+    }
+  }, [currentUser]);
+
+  const resetFormFields = () => {
+    setFormField(defaultValue);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setstate("loading");
+    const { email_address, password, confirm_password, username } = formField;
+
+    if (password !== confirm_password) {
+      alert("passwords do not match");
+      setstate("loaded");
+      return;
+    }
+
+    if (password.length < 8) {
+      alert("Please input a longer password (8+)");
+      setstate("loaded");
+      return;
+    }
+
+    try {
+      const { user } = await createAuthUserWithEmailAndPassword(
+        email_address,
+        password
+      );
+
+      await createUserDocumentFromAuth(user, { username }, username);
+      resetFormFields();
+    } catch (error) {
+      if (error.code === "auth/email-already-in-use") {
+        alert("Cannot create user, email already in use");
+      } else {
+        console.log("user creation encountered an error", error);
+      }
+    }
+
+    setstate("loaded");
+  };
+
   return (
     <div className="max-w-7xl mx-auto bg-gray-50">
-      <Navbar  />
+      <Navbar />
       <div className="flex min-h-screen flex-1 flex-col justify-center items-center max-sm:px-6 px-2 py-12 lg:px-8   ">
         <div className="w-full max-w-[26rem] bg-white px-8 pt-8 pb-12 rounded-md">
           <AuthHead text={"Register"} />
 
           <div className="mt-10 sm:mx-auto sm:w-full ">
             <form className="space-y-6">
-              <Input
-                name="username"
-                type="text"
-                placeholder="Username"
-                className="my-2"
-              />
-              <Input
-                name="email"
-                type="email"
-                placeholder="Email"
-                className="my-2"
-              />
+              {Object.keys(formField).map((key) => {
+                return (
+                  <Input
+                    key={key}
+                    name={getName(key)}
+                    type={
+                      key == "password" || key == "confirm_password"
+                        ? "password"
+                        : "text"
+                    }
+                    value={formField[key]}
+                    placeholder={getName(key)}
+                    onChange={(e) => {
+                      setFormField((prev) => ({
+                        ...prev,
+                        [key]: e.target.value,
+                      }));
+                    }}
+                  />
+                );
+              })}
 
-              <Input
-                name="password"
-                type="password"
-                placeholder="Password"
-                className=""
-              />
-
-              <button className="w-full h-[51px] px-10 py-4 bg-blue-600 rounded-md justify-center items-center gap-2.5 inline-flex text-base font-medium uppercase text-white">
-                Register
+              <button
+                onClick={handleSubmit}
+                className="w-full h-[51px] px-10 py-4 bg-blue-600 rounded-md justify-center items-center gap-2.5 inline-flex text-base font-medium uppercase text-white"
+              >
+                {state == "loading" ? "loading..." : "Register"}
               </button>
             </form>
 
@@ -67,7 +142,10 @@ const Register = () => {
               <span className="text-stone-900 text-xs font-normal ">
                 Have an account?{" "}
               </span>
-              <span className="text-blue-600 text-xs font-semibold  underline cursor-pointer">
+              <span
+                className="text-blue-600 text-xs font-semibold  underline cursor-pointer"
+                onClick={() => router.route("/login")}
+              >
                 Login
               </span>
             </div>
