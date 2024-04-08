@@ -1,14 +1,14 @@
 "use client";
-import { Fragment, useRef, useState } from "react";
+import { Fragment, useContext, useRef, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { FaStar } from "react-icons/fa";
+import { UserContext } from "@/context/user.context";
+import { submitUserReview } from "@/utils/firebase/firebase.utils";
 
-export default function ReviewCreator() {
-  const [open, setOpen] = useState(true);
-
+export default function ReviewCreator({ open, setOpen }) {
   const cancelButtonRef = useRef(null);
-
+  const { currentUser, userData } = useContext(UserContext);
   const items = [
     { name: "Parking Lot", selected: false },
     { name: "Nightlife", selected: false },
@@ -46,18 +46,18 @@ export default function ReviewCreator() {
     { name: "Security", selected: false },
     // Add more items as needed
   ];
-
   const [selectedItems, setSelectedItems] = useState(items);
+
+  const [selectAmenities, setSelectAmenities] = useState(false);
 
   const toggleSelection = (index) => {
     const updatedItems = [...selectedItems];
     updatedItems[index].selected = !updatedItems[index].selected;
     setSelectedItems(updatedItems);
   };
-
   const [rating, setRating] = useState(0);
-
   const [anonymus, setAnonymus] = useState(false);
+  const [review, setReview] = useState("");
 
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -101,8 +101,11 @@ export default function ReviewCreator() {
                     </p>
                   </div>
 
-                  <div className="relative">
-                    <div className="w-full h-[50px] px-4 py-2 bg-sky-50 rounded-md justify-center items-center gap-2 flex my-4">
+                  <div className="relative ">
+                    <div
+                      className="w-full h-[50px] px-4 py-2 bg-sky-50 rounded-md justify-center items-center gap-2 flex my-4 cursor-pointer"
+                      onClick={() => setSelectAmenities((prev) => !prev)}
+                    >
                       <div className="grow shrink basis-0 text-stone-900 text-sm font-normal  leading-none">
                         Select Amenities
                       </div>
@@ -116,116 +119,115 @@ export default function ReviewCreator() {
                         className="w-4 h-4 relative cursor-pointer"
                       >
                         <path
-                          fill-rule="evenodd"
-                          clip-rule="evenodd"
+                          fillRule="evenodd"
+                          clipRule="evenodd"
                           d="M12 5C11.72 5 11.47 5.11 11.29 5.29L8 8.59L4.71 5.29C4.53 5.11 4.28 5 4 5C3.45 5 3 5.45 3 6C3 6.28 3.11 6.53 3.29 6.71L7.29 10.71C7.47 10.89 7.72 11 8 11C8.28 11 8.53 10.89 8.71 10.71L12.71 6.71C12.89 6.53 13 6.28 13 6C13 5.45 12.55 5 12 5Z"
                           fill="#8F95B2"
                         />
                       </svg>
                     </div>
-                    {/**
-                    <div className="w-full h-[164px]  bg-sky-50 rounded-md rounded-br-md border border-violet-200 absolute top-[60px]">
-                    
-                   <div className="w-full h-[164px] p-4 left-0 top-0 absolute justify-start items-start gap-6 flex flex-wrap overflow-hidden">
-                        <div className="flex-col justify-start items-start gap-2 flex">
-                          {selectedItems.slice(0, 5).map((item, index) => (
-                            <div
-                              className={`rounded justify-start items-center gap-3 flex`}
-                              onClick={() => toggleSelection(index)}
-                              key={index}
-                            >
-                              <input
-                                type="checkbox"
-                                className="w-4 h-4 appearance-none rounded border border-gray-300 checked:bg-green-500 checked:border-green-500 focus:outline-none"
-                                checked={item.selected}
-                              />
 
-                              <p className="text-stone-900 text-sm font-normal leading-tight ">
-                                {item.name}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="flex-col justify-start items-start gap-2 flex">
-                          {selectedItems.slice(0, 5).map((item, index) => (
-                            <div
-                              className={`rounded justify-start items-center gap-3 flex`}
-                              onClick={() => toggleSelection(index)}
-                              key={index}
-                            >
-                              <input
-                                type="checkbox"
-                                className="w-4 h-4 appearance-none rounded border border-gray-300 checked:bg-green-500 checked:border-green-500 focus:outline-none"
-                                checked={item.selected}
-                              />
+                    {selectAmenities && (
+                      <div className="w-full h-[164px]  bg-sky-50 rounded-md rounded-br-md border border-violet-200 absolute top-[60px]">
+                        <div className="w-full h-[164px] p-4 left-0 top-0 absolute justify-start items-start gap-6 flex flex-wrap overflow-hidden">
+                          <div className="flex-col justify-start items-start gap-2 flex">
+                            {selectedItems.slice(0, 5).map((item, index) => (
+                              <div
+                                className={`rounded justify-start items-center gap-3 flex`}
+                                onClick={() => toggleSelection(index)}
+                                key={index}
+                              >
+                                <input
+                                  type="checkbox"
+                                  className="w-4 h-4 appearance-none rounded border border-gray-300 checked:bg-green-500 checked:border-green-500 focus:outline-none"
+                                  checked={item.selected}
+                                />
 
-                              <p className="text-stone-900 text-sm font-normal leading-tight ">
-                                {item.name}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="flex-col justify-start items-start gap-2 flex">
-                          {selectedItems.slice(0, 5).map((item, index) => (
-                            <div
-                              className={`rounded justify-start items-center gap-3 flex`}
-                              onClick={() => toggleSelection(index)}
-                              key={index}
-                            >
-                              <input
-                                type="checkbox"
-                                className="w-4 h-4 appearance-none rounded border border-gray-300 checked:bg-green-500 checked:border-green-500 focus:outline-none"
-                                checked={item.selected}
-                              />
+                                <p className="text-stone-900 text-sm font-normal leading-tight ">
+                                  {item.name}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex-col justify-start items-start gap-2 flex">
+                            {selectedItems.slice(5, 10).map((item, index) => (
+                              <div
+                                className={`rounded justify-start items-center gap-3 flex`}
+                                onClick={() => toggleSelection(index + 5)}
+                                key={index}
+                              >
+                                <input
+                                  type="checkbox"
+                                  className="w-4 h-4 appearance-none rounded border border-gray-300 checked:bg-green-500 checked:border-green-500 focus:outline-none"
+                                  checked={item.selected}
+                                />
 
-                              <p className="text-stone-900 text-sm font-normal leading-tight ">
-                                {item.name}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="flex-col justify-start items-start gap-2 flex">
-                          {selectedItems.slice(0, 5).map((item, index) => (
-                            <div
-                              className={`rounded justify-start items-center gap-3 flex`}
-                              onClick={() => toggleSelection(index)}
-                              key={index}
-                            >
-                              <input
-                                type="checkbox"
-                                className="w-4 h-4 appearance-none rounded border border-gray-300 checked:bg-green-500 checked:border-green-500 focus:outline-none"
-                                checked={item.selected}
-                              />
+                                <p className="text-stone-900 text-sm font-normal leading-tight ">
+                                  {item.name}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex-col justify-start items-start gap-2 flex">
+                            {selectedItems.slice(10, 15).map((item, index) => (
+                              <div
+                                className={`rounded justify-start items-center gap-3 flex`}
+                                onClick={() => toggleSelection(index + 10)}
+                                key={index}
+                              >
+                                <input
+                                  type="checkbox"
+                                  className="w-4 h-4 appearance-none rounded border border-gray-300 checked:bg-green-500 checked:border-green-500 focus:outline-none"
+                                  checked={item.selected}
+                                />
 
-                              <p className="text-stone-900 text-sm font-normal leading-tight ">
-                                {item.name}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="flex-col justify-start items-start gap-2 flex">
-                          {selectedItems.slice(0, 5).map((item, index) => (
-                            <div
-                              className={`rounded justify-start items-center gap-3 flex`}
-                              onClick={() => toggleSelection(index)}
-                              key={index}
-                            >
-                              <input
-                                type="checkbox"
-                                className="w-4 h-4 appearance-none rounded border border-gray-300 checked:bg-green-500 checked:border-green-500 focus:outline-none"
-                                checked={item.selected}
-                              />
+                                <p className="text-stone-900 text-sm font-normal leading-tight ">
+                                  {item.name}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex-col justify-start items-start gap-2 flex">
+                            {selectedItems.slice(15, 20).map((item, index) => (
+                              <div
+                                className={`rounded justify-start items-center gap-3 flex`}
+                                onClick={() => toggleSelection(index + 15)}
+                                key={index}
+                              >
+                                <input
+                                  type="checkbox"
+                                  className="w-4 h-4 appearance-none rounded border border-gray-300 checked:bg-green-500 checked:border-green-500 focus:outline-none"
+                                  checked={item.selected}
+                                />
 
-                              <p className="text-stone-900 text-sm font-normal leading-tight ">
-                                {item.name}
-                              </p>
-                            </div>
-                          ))}
+                                <p className="text-stone-900 text-sm font-normal leading-tight ">
+                                  {item.name}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex-col justify-start items-start gap-2 flex">
+                            {selectedItems.slice(20, 25).map((item, index) => (
+                              <div
+                                className={`rounded justify-start items-center gap-3 flex`}
+                                onClick={() => toggleSelection(index + 20)}
+                                key={index}
+                              >
+                                <input
+                                  type="checkbox"
+                                  className="w-4 h-4 appearance-none rounded border border-gray-300 checked:bg-green-500 checked:border-green-500 focus:outline-none"
+                                  checked={item.selected}
+                                />
+
+                                <p className="text-stone-900 text-sm font-normal leading-tight ">
+                                  {item.name}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
-              
-                    </div>
-                        */}
+                    )}
                   </div>
 
                   <div className=" flex-col justify-center items-start gap-3.5 flex">
@@ -242,6 +244,7 @@ export default function ReviewCreator() {
                               i <= rating ? "opacity-100" : "opacity-40"
                             } cursor-pointer`}
                             onClick={() => setRating(i)}
+                            key={i}
                           />
                         ))}
                     </div>
@@ -251,7 +254,10 @@ export default function ReviewCreator() {
                     Write Review
                   </h1>
 
-                  <textarea className="w-full p-3 bg-neutral-50 rounded-md border border-violet-200 leading-[18px] tracking-tight h-[173px]" />
+                  <textarea
+                    className="w-full p-3 bg-neutral-50 rounded-md border border-violet-200 leading-[18px] tracking-tight h-[173px]"
+                    onChange={(e) => setReview(e.target.value)}
+                  />
 
                   <div className="flex mt-4 mb-6 items-center gap-3">
                     <input
@@ -270,7 +276,18 @@ export default function ReviewCreator() {
                     <button
                       type="button"
                       className="flex w-full justify-center rounded-md bg-blue-600 px-9 py-4 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3   "
-                      onClick={() => setOpen(false)}
+                      onClick={() => {
+                        setOpen(false);
+
+                        submitUserReview(currentUser, userData, {
+                          rating,
+                          anonymus,
+                          review,
+                          selectedItems: selectedItems.filter(
+                            (item) => item.selected
+                          ),
+                        });
+                      }}
                     >
                       SUBMIT
                     </button>
@@ -282,7 +299,6 @@ export default function ReviewCreator() {
                     >
                       CANCEL
                     </button>
-
                   </div>
                 </div>
               </Dialog.Panel>

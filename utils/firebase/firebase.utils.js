@@ -117,3 +117,38 @@ export const getUserDetails = async (userAuth) => {
 
   return res;
 };
+
+export const submitUserReview = async (userAuth, userInfo, review) => {
+  if (!userAuth?.uid || !review || !userInfo) {
+    alert("Please login to submit a review");
+    return;
+  }
+
+  const reviewCollectionRef = collection(db, "reviews");
+
+  const reviewDocRef = doc(reviewCollectionRef);
+
+  const createdAt = Timestamp.now();
+
+  try {
+    await setDoc(reviewDocRef, {
+      ...review,
+      createdAt,
+      userInfo,
+    });
+    alert("Review submitted successfully");
+  } catch (error) {
+    console.log("error creating the review", error.message);
+    alert("Review submission failed");
+  }
+};
+
+export const getReviews = async () => {
+  const reviewCollectionRef = collection(db, "reviews");
+
+  const reviewSnapshot = await getDocs(reviewCollectionRef);
+
+  const reviews = reviewSnapshot.docs.map((doc) => doc.data());
+
+  return reviews;
+};

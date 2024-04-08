@@ -1,8 +1,8 @@
-"use client"
+"use client";
 import Navbar from "@/components/nav_bar/Navbar";
 import NoReview from "@/components/review/NoReview";
 import star from "@/assets/review/star.svg";
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { FaRegThumbsDown, FaRegThumbsUp, FaThumbsUp } from "react-icons/fa";
 import { FaRegMessage } from "react-icons/fa6";
 import { CiShare2 } from "react-icons/ci";
@@ -10,48 +10,77 @@ import { IoBookmarkOutline } from "react-icons/io5";
 import ReviewCreator from "@/components/review/ReviewCreator";
 import { useRouter } from "next/navigation";
 import { UserContext } from "@/context/user.context";
+import { collection, onSnapshot, query } from "firebase/firestore";
+import { db } from "@/utils/firebase/firebase.utils";
 
 const Review = () => {
-  const { currentUser, userDetails } = useContext(UserContext);
+  const { currentUser, setCurrentUser, userDetails } = useContext(UserContext);
 
   const router = useRouter();
 
-  useEffect(() => {
-    if (!currentUser) {
-      router.push("/register");
-    }
-  }, [currentUser]);
+  const [open, setOpen] = useState(false);
 
+  const [review, setReview] = useState([]);
+
+  const [state, setstate] = useState("unloaded");
+
+  useEffect(() => {
+    if (!currentUser && open) {
+      router.replace("/login");
+    }
+  }, [open]);
+
+  useEffect(() => {
+    const q = query(collection(db, "reviews"));
+    const unsub = onSnapshot(q, (querySnapshot) => {
+      const reviews = [];
+      querySnapshot.forEach((doc) => {
+        reviews.push(doc.data());
+      });
+
+      setReview(reviews);
+      setstate("loaded");
+    });
+
+    return unsub;
+  }, [currentUser]);
 
   return (
     <div className="overflow-x-hidden">
       <div className="w-full bg-blue-50 justify-center items-center flex ">
         <div className=" pb-4 flex-col justify-start items-center ">
           <Navbar />
-          <ReviewMenu />
+          <ReviewMenu setReview={setOpen} review={review} />
         </div>
       </div>
-
-      <div className="flex gap-[1.75rem] max-w-7xl mx-auto sm:p-6 p-3 mt-8">
-        <div className="w-full">
-          {Array(10)
-            .fill(0)
-            .map((_, i) => (
-              <ReviewMessage key={i} />
-            ))}
+      {state === "unloaded" ? (
+        <div className="h-[80vh] flex justify-center items-center">
+          <p className="">Loading...</p>
         </div>
+      ) : state === "loaded" && review.length === 0 ? (
+        <NoReview setReview={setOpen} />
+      ) : (
+        <>
+          <div className="flex gap-[1.75rem] max-w-7xl mx-auto sm:p-6 p-3 mt-8">
+            <div className="w-full">
+              {review.map((ite, i) => (
+                <ReviewMessage key={i} reviewData={ite} />
+              ))}
+            </div>
 
-        <ReviewImages />
-      </div>
+            <ReviewImages />
+          </div>
+        </>
+      )}
 
-      <ReviewCreator />
+      <ReviewCreator open={open} setOpen={setOpen} />
     </div>
   );
 };
 
 export default Review;
 
-function ReviewMenu() {
+function ReviewMenu({ setReview, review }) {
   return (
     <div className="flex-col justify-start items-start gap-4 flex max-w-7xl w-full  px-4">
       <div className="justify-start items-start gap-[390px] flex w-full">
@@ -62,7 +91,10 @@ function ReviewMenu() {
             </h1>
 
             <div className=" justify-start items-center gap-4 flex">
-              <button className=" px-10 py-4 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 rounded-md items-center gap-2.5  text-white text-base font-medium uppercase min-w-fit">
+              <button
+                className=" px-10 py-4 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 rounded-md items-center gap-2.5  text-white text-base font-medium uppercase min-w-fit"
+                onClick={() => setReview(true)}
+              >
                 Leave a review
               </button>
 
@@ -77,7 +109,7 @@ function ReviewMenu() {
 
           <div className="justify-start items-start gap-1 flex max-md:justify-center w-full">
             <p className="text-center text-zinc-900 text-base font-semibold  leading-normal max-sm:my-4 max-md:text-center">
-              “0” Reviews
+              “{review.length || 0}” Reviews
             </p>
           </div>
         </div>
@@ -144,36 +176,55 @@ function ReviewCategories() {
   );
 }
 
-function ReviewMessage() {
+function ReviewMessage({ reviewData }) {
+  const { review, rating, anonymus, createdAt, selectedItems, userInfo } =
+    reviewData;
+  const { username } = userInfo;
   return (
     <>
       <div className="flex flex-col gap-[.5rem]">
         <div className="flex justify-between items-center">
-          <div className="flex gap-2 items-center">
-            <img
-              className="w-6 h-6 rounded-full"
-              src="https://via.placeholder.com/24x24"
-            />
+          {anonymus ? (
+            <div className="flex gap-2 items-center">
+              <img
+                className="w-6 h-6 rounded-full"
+                src="https://via.placeholder.com/24x24"
+              />
 
-            <p className="text-stone-900 text-sm font-normal">James T.</p>
+              <p className="text-stone-900 text-sm font-normal">Anonymus</p>
 
-            <div className="text-stone-900 text-opacity-60 text-sm font-normal ">
-              5 months ago
+              <div className="text-stone-900 text-opacity-60 text-sm font-normal ">
+                5 months ago
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex gap-2 items-center">
+              <img
+                className="w-6 h-6 rounded-full"
+                src="https://via.placeholder.com/24x24"
+              />
+
+              <p className="text-stone-900 text-sm font-normal">
+                {username?.slice(0, 1)?.toUpperCase() + username?.slice(1)}
+              </p>
+
+              <div className="text-stone-900 text-opacity-60 text-sm font-normal ">
+                5 months ago
+              </div>
+            </div>
+          )}
 
           <div className="flex items-center gap-1">
             <img src={star.src} alt="" className="" />
 
-            <div className="text-stone-900 text-sm font-normal ">4.0</div>
+            <div className="text-stone-900 text-sm font-normal ">
+              {rating}.0
+            </div>
           </div>
         </div>
 
         <p className="max-w-[722px] text-zinc-900 text-base font-normal w-full">
-          There is no stable electricity. The roads are fairly good and there is
-          a sense of community. The drainage system is poor and most residents
-          litter their surroundings. There are several grocery stores and
-          Supermarkets.
+          {review}
         </p>
 
         <div className="flex gap-8">
